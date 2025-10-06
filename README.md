@@ -10,7 +10,7 @@ It's main purpose is pretty straight forward:
 --CONTACT--
 If any error occurs or suggestion, you can contact me via:
 1) Github: zioam
-2) Discord: _zioam_ (zioam)
+2) Discord: .zioam. (zioam)
 3) Gmail: maxiap2016@gmail.com
 
 --EXTRA--
