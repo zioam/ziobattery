@@ -16,20 +16,23 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.NotificationChannelCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
-import kotlin.math.cos
-import kotlin.math.sin
 import android.content.Intent
 import ziobattery.BatteryService
 
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+
 class MainActivity : ComponentActivity() {
+
+    private val requestCodeNotifications = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         createNotificationChannel()
+        askNotificationPermission() // 🔹 add this
 
         setContent {
             MaterialTheme(colorScheme = darkColorScheme()) {
@@ -38,14 +41,32 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun askNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    requestCodeNotifications
+                )
+            }
+        }
+    }
+
     private fun createNotificationChannel() {
-        val channel = NotificationChannel(
-            "battery_alarm",
-            "Battery Alarm",
-            NotificationManager.IMPORTANCE_HIGH
-        )
-        val manager = getSystemService(NotificationManager::class.java)
-        manager.createNotificationChannel(channel)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "battery_alarm",
+                "Battery Alarm",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(channel)
+        }
     }
 }
 
@@ -54,6 +75,7 @@ fun BatteryAlarmScreen() {
     val context = LocalContext.current
     var batteryLevel by remember { mutableIntStateOf(0) }
     var targetLevel by remember { mutableIntStateOf(80) }
+    val version = 1.1
 
     // Battery receiver
     LaunchedEffect(Unit) {
@@ -113,6 +135,15 @@ fun BatteryAlarmScreen() {
             }) {
                 Text("Set")
             }
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            Text(
+                text = "ziobattery $version%",
+                color = Color(0xFF00FFAA),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }

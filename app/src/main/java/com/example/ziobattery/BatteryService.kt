@@ -23,7 +23,10 @@ class BatteryService : Service() {
             .setOngoing(true)
             .build()
 
-        startForeground(1, notification)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForeground(1, notification)
+        }
+
 
         if (!receiverRegistered) {
             val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
